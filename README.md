@@ -12,10 +12,8 @@ If you upload to Qlik Cloud, you need
 If you upload to Qlik Sense Windows you need
 - access via QRS API port 4242
 - the client certificate in PFX format
-- PowerShell 7 (PowerShell 7 can run alongside with your current Windows' PowerShell version)
+- PowerShell 7 if your Qlik Sense server certificate is not a public one*
 
-
-
-
-
+*only PowerShell 7 has the option to ignore an invalid certificate. PowerShell 7 can be installed alongside with your current Windows' PowerShell 
+version, they can coexist.
 
