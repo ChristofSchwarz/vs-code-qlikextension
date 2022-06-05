@@ -2,6 +2,11 @@
 
 Environment: Windows
 
-You need **PowerShell 7** for this to run. PowerShell 7 can run alongside with your current Windows' PowerShell version
+You need 
+- **PowerShell 7** for this to run. (PowerShell 7 can run alongside with your current Windows' PowerShell version)
+- Qlik CLI from https://qlik.dev/tutorials/get-started-with-qlik-cli
+- Visual Studio Code extension "runOnSave"
+
+
 
 
