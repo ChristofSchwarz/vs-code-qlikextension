@@ -1,0 +1,11 @@
+{
+  "runOnSave.commands": [
+    {
+      "match": ".*",
+      "runIn": "terminal",
+      "~command": "& 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' ${workspaceFolder}\\.vscode\\updateExtension.ps1",
+      "command": "& 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' ${workspaceFolder}\\.vscode\\updateCloudExtension.ps1 \"C:\\\\Users\\\\chris\\\\Downloads\\\\\""
+    }
+  ],
+  "editor.formatOnSave": true
+}
