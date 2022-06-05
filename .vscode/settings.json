@@ -3,9 +3,21 @@
     {
       "match": ".*",
       "runIn": "terminal",
-      "~command": "& 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' ${workspaceFolder}\\.vscode\\updateWinExtension.ps1",
-      "command": "& 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' ${workspaceFolder}\\.vscode\\updateCloudExtension.ps1 \"..\\\\..\\\\\""
+      "~command": "& 'C:\\Program Files\\PowerShell\\7\\pwsh.exe' ${workspaceFolder}\\.vscode\\updateExtension.ps1",
+      "command": "${workspaceFolder}\\.vscode\\updateExtension.ps1"
     }
   ],
-  "editor.formatOnSave": true
+  "editor.formatOnSave": true,
+  "christofs_options": {
+    "save_to": "cloud",
+    "save_to_help": "put 'cloud' or 'win' or 'both'",
+    "qlik_cli_location": "..\\..\\qlik.exe",
+    "qlik_cli_location_help": "folder where qlik.exe is found, relative or absolute folder",
+    "qrs_url": "https://qs-i-dev.databridge.ch:4242/qrs",
+    "client_cert_location": "c:\\certificates\\qs-i-dev\\client.pfx",
+    "client_cert_location_help": "need .pfx file if connection is via port 4242",
+    "header_key": "X-Qlik-User",
+    "header_value": "UserDirectory=INTERNAL;UserID=sa_repository",
+    "header_help": "provide key / value pair to be added to http-header, who is the user context of QRS API call"
+  }
 }
