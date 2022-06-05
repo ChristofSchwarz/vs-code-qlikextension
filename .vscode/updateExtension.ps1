@@ -38,39 +38,11 @@ if (Test-Path $file) {
 Compress-Archive -Path "$($folder)$($rnd)" -DestinationPath "$file"
 Remove-Item -LiteralPath "$($folder)$($rnd)" -Force -Recurse
 
-# ------------------- Qlik Cloud ----------------------
-
-if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
-    # want to upload to Qlik Cloud
-    Write-Host "Uploading extension $($extension_name) to Qlik Cloud"
-    $extension_exists = & $qlik_exe extension get "$($extension_name)"
-
-    if ($extension_exists -like '*"id":*') {
-        Write-Host "Extension exists already. Updating it ..."
-        $extension_exists = $extension_exists | ConvertFrom-Json
-        $resp = & $qlik_exe extension patch "$($extension_exists.id)" --file "$($file)"
-    }
-    else {
-        Write-Host "New extension $($extension_name). Upload it for the first time ..."
-        $resp = & $qlik_exe extension create --file "$($file)"
-    }
-    
-
-    if ($resp.Length -gt 0) {
-        $resp = $resp | ConvertFrom-Json
-        Write-Host "Extension $($resp.name) uploaded (server timestamp $($resp.updatedAt))"
-    }
-    else {
-        Write-Host "An error occurred. Not getting expected response." -ForegroundColor 'red' -BackgroundColor 'black'
-    }
-} 
-
-
 # ------------------- Qlik Sense Windows ------------------------
 
 if (@("win", "both").Contains($settings.christofs_options.save_to)) {
     # want to upload to Qlik Sense on Windows
-    Write-Host "Uploading extension $($extension_name) to Qlik Sense on Windows"
+    Write-Host "Uploading extension '$($extension_name)' to Qlik Sense on Windows"
     $cert = Get-PfxCertificate -FilePath $settings.christofs_options.client_cert_location
     $api_url = $settings.christofs_options.qrs_url
     $xrfkey = "A3VWMWM3VGRH4X3F"
@@ -100,7 +72,7 @@ if (@("win", "both").Contains($settings.christofs_options.save_to)) {
         $gotoupload = 1
     }
     else {
-        Write-Host "The name '$($extension_name)' exists $($extension_list.value.length) times."
+        Write-Host "Error: The name '$($extension_name)' exists $($extension_list.value.length) times."
         $gotoupload = 0
     }
     
@@ -115,3 +87,33 @@ if (@("win", "both").Contains($settings.christofs_options.save_to)) {
         Write-Host "Extension '$($extension_name)' uploaded ($($new_ext[0].id))"
     }
 }
+
+# ------------------- Qlik Cloud ----------------------
+
+if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
+    # want to upload to Qlik Cloud
+    Write-Host "Uploading extension '$($extension_name)' to Qlik Cloud"
+    $extension_exists = & $qlik_exe extension get "$($extension_name)"
+
+    if ($extension_exists -like '*"id":*') {
+        Write-Host "Extension already exists. Updating it ..."
+        $extension_exists = $extension_exists | ConvertFrom-Json
+        $resp = & $qlik_exe extension patch "$($extension_exists.id)" --file $file
+    }
+    else {
+        Write-Host "New extension $($extension_name). Upload it for the first time ..."
+        $resp = & $qlik_exe extension create --file $file
+    }
+    
+    # $extension_exists2 = & $qlik_exe extension get "$($extension_name)"
+    # Write-Host 'really exists?'
+    # Write-Host $extension_exists2
+
+    if ($resp.Length -gt 0) {
+        $resp = $resp | ConvertFrom-Json
+        Write-Host "Extension '$($resp.name)' uploaded (server timestamp $($resp.updatedAt))"
+    }
+    else {
+        Write-Host "An error occurred. Not getting expected response." -ForegroundColor 'red' -BackgroundColor 'black'
+    }
+} 
