@@ -1,8 +1,8 @@
 # Script will upload the extension (that is the parent path to this .ps1 script)
+# to Qlik Sense Windows or Qlik Cloud or both, depending on the settings in settings.json
 # if the extension already exists, it will be patched with the new version
-# As optional parameter provide the folder, where qlik.exe (qlik CLI for SaaS) is found
 
-# Christof Schwarz, 06-Jan-2022
+# Christof Schwarz, 06-Jun-2022
 Write-Host "*** updateExtension PowerShell Script by Christof Schwarz ***"
 
 # Read settings from Json file
@@ -42,7 +42,7 @@ Remove-Item -LiteralPath "$($folder)$($rnd)" -Force -Recurse
 
 if (@("win", "both").Contains($settings.christofs_options.save_to)) {
     # want to upload to Qlik Sense on Windows
-    Write-Host "Uploading extension '$($extension_name)' to Qlik Sense on Windows"
+    Write-Host "--> Qlik Sense on Windows: Publishing extension '$($extension_name)'"
     $cert = Get-PfxCertificate -FilePath $settings.christofs_options.client_cert_location
     $api_url = $settings.christofs_options.qrs_url
     $xrfkey = "A3VWMWM3VGRH4X3F"
@@ -92,28 +92,41 @@ if (@("win", "both").Contains($settings.christofs_options.save_to)) {
 
 if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
     # want to upload to Qlik Cloud
-    Write-Host "Uploading extension '$($extension_name)' to Qlik Cloud"
-    $extension_exists = & $qlik_exe extension get "$($extension_name)"
 
-    if ($extension_exists -like '*"id":*') {
-        Write-Host "Extension already exists. Updating it ..."
-        $extension_exists = $extension_exists | ConvertFrom-Json
-        $resp = & $qlik_exe extension patch "$($extension_exists.id)" --file $file
-    }
-    else {
-        Write-Host "New extension $($extension_name). Upload it for the first time ..."
-        $resp = & $qlik_exe extension create --file $file
-    }
+    $resp = & $qlik_exe context use "$($settings.christofs_options.qlik_cli_context)" 
+    # if the response is an Error (length: 0), that is when the context doesn't exist, skip the rest.
+    if ($resp.length -gt 0) {
     
-    # $extension_exists2 = & $qlik_exe extension get "$($extension_name)"
-    # Write-Host 'really exists?'
-    # Write-Host $extension_exists2
+        Write-Host "--> Qlik Cloud: Publishing extension '$($extension_name)'"
+        # $extension_exists = & $qlik_exe extension get "$($extension_name)"
+        $extension_list = & $qlik_exe extension ls
+        $extension_list = $extension_list | ConvertFrom-Json
 
-    if ($resp.Length -gt 0) {
-        $resp = $resp | ConvertFrom-Json
-        Write-Host "Extension '$($resp.name)' uploaded (server timestamp $($resp.updatedAt))"
-    }
-    else {
-        Write-Host "An error occurred. Not getting expected response." -ForegroundColor 'red' -BackgroundColor 'black'
+        # parse through the response Json list of extensions and look for the given one
+        $extension_id = ""
+
+        foreach ($extension in $extension_list) {
+            # Write-Host "is it $($extension.qextFilename) ?"
+            if ($extension.qextFilename -like "$($extension_name)") {
+                $extension_id = $extension.id
+                Write-Host "Patching existing extension '$($extension_name)' (id $($extension_id))"
+            } 
+        }
+
+        if ($extension_id -eq "") {
+            Write-Host "Uploading extension '$($extension_name)' first time ..."
+            $resp = & $qlik_exe extension create "$($extension_id)" --file "$($file)"
+        }
+        else {
+            $resp = & $qlik_exe extension patch "$($extension_id)" --file "$($file)"
+        }
+    
+        if ($resp.Length -gt 0) {
+            $resp = $resp | ConvertFrom-Json
+            Write-Host "Extension '$($extension_name)' uploaded (id $($resp.id))"
+        }
+        else {
+            Write-Host "An error occurred. Not getting expected response." -ForegroundColor 'red' -BackgroundColor 'black'
+        }
     }
 } 
