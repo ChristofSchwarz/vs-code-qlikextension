@@ -2,8 +2,10 @@
 # to Qlik Sense Windows or Qlik Cloud or both, depending on the settings in settings.json
 # if the extension already exists, it will be patched with the new version
 
-# Christof Schwarz, 06-Jun-2022
-Write-Host "*** updateExtension PowerShell Script by Christof Schwarz ***"
+# Christof Schwarz, 06-Jun-2022: Original version
+# Christof Schwarz, 21-Jun-2022, fix to check if .bat file or .git folder exists before deleting it
+
+Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.01 ***"
 
 # Read settings from Json file
 $settings = Get-Content -Raw -Path ".vscode\settings.json" | ConvertFrom-Json
@@ -21,13 +23,19 @@ $extension_name = (Get-ChildItem "$($folder)\*.qext" | Select-Object BaseName).B
 # Write-Host "Extension is $($extension_name)"
 
 # Make a temp copy of this work folder but remove the .ps1 file (Qlik Cloud wont
-# allow a .ps1 file to be part of an extension .zip)
+# allow a .ps1 or .bat file to be part of an extension .zip)
 $rnd = Get-Random
 Copy-Item "$($folder)" -Destination "$($folder)$($rnd)" -Recurse -Container
 Remove-Item -LiteralPath "$($folder)$($rnd)\.vscode" -Force -Recurse
-Remove-Item -LiteralPath "$($folder)$($rnd)\doc" -Force -Recurse
-Remove-Item -LiteralPath "$($folder)$($rnd)\.git" -Force -Recurse
-Remove-Item -LiteralPath "$($folder)$($rnd)\pushToGit.bat" -Force
+if (Test-Path -Path "$($folder)$($rnd)\doc") {
+    Remove-Item -LiteralPath "$($folder)$($rnd)\doc" -Force -Recurse
+}
+if (Test-Path -Path "$($folder)$($rnd)\.git") {
+    Remove-Item -LiteralPath "$($folder)$($rnd)\.git" -Force -Recurse
+}
+if (Test-Path "$($folder)$($rnd)\pushToGit.bat" -PathType leaf) {
+    Remove-Item -LiteralPath "$($folder)$($rnd)\pushToGit.bat" -Force
+}
 Write-Host "Creating zip file from folder '$($folder)'"
 
 # create a zip file from the temp folder then remove the temp folder 
@@ -42,7 +50,7 @@ Remove-Item -LiteralPath "$($folder)$($rnd)" -Force -Recurse
 
 if (@("win", "both").Contains($settings.christofs_options.save_to)) {
     # want to upload to Qlik Sense on Windows
-    Write-Host "--> Qlik Sense on Windows: Publishing extension '$($extension_name)'"
+    Write-Host "`n--> Qlik Sense on Windows: Publishing extension '$($extension_name)'"
     $cert = Get-PfxCertificate -FilePath $settings.christofs_options.client_cert_location
     $api_url = $settings.christofs_options.qrs_url
     $xrfkey = "A3VWMWM3VGRH4X3F"
@@ -97,7 +105,7 @@ if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
     # if the response is an Error (length: 0), that is when the context doesn't exist, skip the rest.
     if ($resp.length -gt 0) {
     
-        Write-Host "--> Qlik Cloud: Publishing extension '$($extension_name)'"
+        Write-Host "`n--> Qlik Cloud: Publishing extension '$($extension_name)'"
         # $extension_exists = & $qlik_exe extension get "$($extension_name)"
         $extension_list = & $qlik_exe extension ls
         $extension_list = $extension_list | ConvertFrom-Json
