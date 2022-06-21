@@ -36,6 +36,9 @@ if (Test-Path -Path "$($folder)$($rnd)\.git") {
 if (Test-Path "$($folder)$($rnd)\pushToGit.bat" -PathType leaf) {
     Remove-Item -LiteralPath "$($folder)$($rnd)\pushToGit.bat" -Force
 }
+if (Test-Path "$($folder)$($rnd)\pushToGit.ps1" -PathType leaf) {
+    Remove-Item -LiteralPath "$($folder)$($rnd)\pushToGit.ps1" -Force
+}
 Write-Host "Creating zip file from folder '$($folder)'"
 
 # create a zip file from the temp folder then remove the temp folder 
