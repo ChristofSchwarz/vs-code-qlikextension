@@ -4,8 +4,9 @@
 
 # Christof Schwarz, 06-Jun-2022: Original version
 # Christof Schwarz, 21-Jun-2022, fix to check if .bat file or .git folder exists before deleting it
+# Christof Schwarz, 15-Jul-2022, delete all *.ps1 files in the zip copy
 
-Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.01 ***"
+Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.02 ***"
 
 # Read settings from Json file
 $settings = Get-Content -Raw -Path ".vscode\settings.json" | ConvertFrom-Json
@@ -33,11 +34,8 @@ if (Test-Path -Path "$($folder)$($rnd)\doc") {
 if (Test-Path -Path "$($folder)$($rnd)\.git") {
     Remove-Item -LiteralPath "$($folder)$($rnd)\.git" -Force -Recurse
 }
-if (Test-Path "$($folder)$($rnd)\pushToGit.bat" -PathType leaf) {
-    Remove-Item -LiteralPath "$($folder)$($rnd)\pushToGit.bat" -Force
-}
-if (Test-Path "$($folder)$($rnd)\pushToGit.ps1" -PathType leaf) {
-    Remove-Item -LiteralPath "$($folder)$($rnd)\pushToGit.ps1" -Force
+if (Test-Path "$($folder)$($rnd)\*.ps1" -PathType leaf) {
+    Remove-Item "$($folder)$($rnd)\*.ps1" -Force
 }
 Write-Host "Creating zip file from folder '$($folder)'"
 
