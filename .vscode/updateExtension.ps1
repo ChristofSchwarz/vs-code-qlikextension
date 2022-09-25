@@ -107,12 +107,10 @@ if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
     # if the response is an Error (length: 0), that is when the context doesn't exist, skip the rest.
     if ($resp.length -gt 0) {
     
-        Write-Host -f Cyan "`n--> Qlik Cloud: Publishing extension '$($extension_name)'"
+        Write-Host -f Cyan "`n--> Qlik Cloud: Publishing extension '$($extension_name)' to '$($settings.christofs_options.qlik_cli_context)'"
         # $extension_exists = & $qlik_exe extension get "$($extension_name)"
         $extension_list = & $qlik_exe extension ls
-        # if (-not $extension_list) {
-        # eyJhbGciOiJFUzM4NCIsImtpZCI6IjA5NWVlNWIyLTBhNGUtNDdkOS1iZDI0LWRmNTRkYzdkNWU0ZSIsInR5cCI6IkpXVCJ9.eyJzdWJUeXBlIjoidXNlciIsInRlbmFudElkIjoiREU4UmkwRE0zb0dLa01rTHhKUGcyenV5UHhTdWpteEYiLCJqdGkiOiIwOTVlZTViMi0wYTRlLTQ3ZDktYmQyNC1kZjU0ZGM3ZDVlNGUiLCJhdWQiOiJxbGlrLmFwaSIsImlzcyI6InFsaWsuYXBpL2FwaS1rZXlzIiwic3ViIjoiNjJjZWMwMTkxNjBhNmFmMDMzN2YyOGRhIn0.lwZc7AUBZOEUXxqJ9XJ8mKh5d0Z3eyT88hrjguIjzP4l2ciVMEnA87VF5g5dvWQbZj8sJF-Y_rovEvbtjFibhFikVhNAlvCy_pvZc5ZX_mC13UV_W5Z1PZpc1FsncQ9m
-        if ($true) {
+        if (-not $extension_list) {
             Write-Host -f Red "Error: qlik.exe does not answer as expected."
             $server = & $qlik_exe context get | Where-Object { $_ -like "Server:*" }
             $server = ($server.split('Server:')[1]).Trim()
