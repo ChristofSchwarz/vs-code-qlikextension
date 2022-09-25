@@ -2,11 +2,12 @@
 # to Qlik Sense Windows or Qlik Cloud or both, depending on the settings in settings.json
 # if the extension already exists, it will be patched with the new version
 
-# Christof Schwarz, 06-Jun-2022: Original version
+# Christof Schwarz, 06-Jun-2022, Original version
 # Christof Schwarz, 21-Jun-2022, fix to check if .bat file or .git folder exists before deleting it
 # Christof Schwarz, 15-Jul-2022, delete all *.ps1 files in the zip copy
+# Christof Schwarz, 25-Sep-2022, ask to enter new API Key in cloud, when first command fails 
 
-Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.02 ***"
+Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.1 ***"
 
 # Read settings from Json file
 $settings = Get-Content -Raw -Path ".vscode\settings.json" | ConvertFrom-Json
@@ -106,9 +107,29 @@ if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
     # if the response is an Error (length: 0), that is when the context doesn't exist, skip the rest.
     if ($resp.length -gt 0) {
     
-        Write-Host "`n--> Qlik Cloud: Publishing extension '$($extension_name)'"
+        Write-Host -f Cyan "`n--> Qlik Cloud: Publishing extension '$($extension_name)'"
         # $extension_exists = & $qlik_exe extension get "$($extension_name)"
         $extension_list = & $qlik_exe extension ls
+        # if (-not $extension_list) {
+        # eyJhbGciOiJFUzM4NCIsImtpZCI6IjA5NWVlNWIyLTBhNGUtNDdkOS1iZDI0LWRmNTRkYzdkNWU0ZSIsInR5cCI6IkpXVCJ9.eyJzdWJUeXBlIjoidXNlciIsInRlbmFudElkIjoiREU4UmkwRE0zb0dLa01rTHhKUGcyenV5UHhTdWpteEYiLCJqdGkiOiIwOTVlZTViMi0wYTRlLTQ3ZDktYmQyNC1kZjU0ZGM3ZDVlNGUiLCJhdWQiOiJxbGlrLmFwaSIsImlzcyI6InFsaWsuYXBpL2FwaS1rZXlzIiwic3ViIjoiNjJjZWMwMTkxNjBhNmFmMDMzN2YyOGRhIn0.lwZc7AUBZOEUXxqJ9XJ8mKh5d0Z3eyT88hrjguIjzP4l2ciVMEnA87VF5g5dvWQbZj8sJF-Y_rovEvbtjFibhFikVhNAlvCy_pvZc5ZX_mC13UV_W5Z1PZpc1FsncQ9m
+        if ($true) {
+            Write-Host -f Red "Error: qlik.exe does not answer as expected."
+            $server = & $qlik_exe context get | Where-Object { $_ -like "Server:*" }
+            $server = ($server.split('Server:')[1]).Trim()
+            $context = & $qlik_exe context get | Where-Object { $_ -like "Name:*" }
+            $context = ($context.split('Name:')[1]).Trim()
+            Write-Host -F Green "Try context $context with a new API Key, get it on $server"
+            
+            $apikey = Read-Host -Prompt "New API Key (leave emtpy to quit)"
+            if (-not $apikey) { Exit }
+            $info = & $qlik_exe context update "$context" --api-key $apikey
+            # Write-Host -F Green (ConvertTo-Json -i $info)
+            $extension_list = & $qlik_exe extension ls
+            if (-not $extension_list) {
+                Write-Host -f Red "Error: qlik.exe still does not answer as expected."
+                Write-Host -f Red "Please get qlik.exe work with the context $context"
+            }
+        }
         $extension_list = $extension_list | ConvertFrom-Json
 
         # parse through the response Json list of extensions and look for the given one
@@ -121,6 +142,7 @@ if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
                 Write-Host "Patching existing extension '$($extension_name)' (id $($extension_id))"
             } 
         }
+
 
         if ($extension_id -eq "") {
             Write-Host "Uploading extension '$($extension_name)' first time ..."
