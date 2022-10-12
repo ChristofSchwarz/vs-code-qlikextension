@@ -5,9 +5,10 @@
 # Christof Schwarz, 06-Jun-2022, Original version
 # Christof Schwarz, 21-Jun-2022, fix to check if .bat file or .git folder exists before deleting it
 # Christof Schwarz, 15-Jul-2022, delete all *.ps1 files in the zip copy
-# Christof Schwarz, 25-Sep-2022, ask to enter new API Key in cloud, when first command fails 
+# v1.1, Christof Schwarz, 25-Sep-2022, ask to enter new API Key in cloud, when first command fails 
+# v1.1.1, Christof Schwarz, 11-Oct-2022, coloring the console output
 
-Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.1 ***"
+Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.1.1 ***"
 
 # Read settings from Json file
 $settings = Get-Content -Raw -Path ".vscode\settings.json" | ConvertFrom-Json
@@ -29,15 +30,21 @@ $extension_name = (Get-ChildItem "$($folder)\*.qext" | Select-Object BaseName).B
 $rnd = Get-Random
 Copy-Item "$($folder)" -Destination "$($folder)$($rnd)" -Recurse -Container
 Remove-Item -LiteralPath "$($folder)$($rnd)\.vscode" -Force -Recurse
+Get-ChildItem "$($folder)$($rnd)\*.cmd" -Recurse | Remove-Item
+Get-ChildItem "$($folder)$($rnd)\*.bat" -Recurse | Remove-Item
+Get-ChildItem "$($folder)$($rnd)\*.ps1" -Recurse | Remove-Item
+Get-ChildItem "$($folder)$($rnd)\*.njs" -Recurse | Remove-Item
+
 if (Test-Path -Path "$($folder)$($rnd)\doc") {
     Remove-Item -LiteralPath "$($folder)$($rnd)\doc" -Force -Recurse
 }
 if (Test-Path -Path "$($folder)$($rnd)\.git") {
     Remove-Item -LiteralPath "$($folder)$($rnd)\.git" -Force -Recurse
 }
-if (Test-Path "$($folder)$($rnd)\*.ps1" -PathType leaf) {
-    Remove-Item "$($folder)$($rnd)\*.ps1" -Force
-}
+# if (Test-Path "$($folder)$($rnd)\*.ps1" -PathType leaf) {
+#     Remove-Item "$($folder)$($rnd)\*.ps1" -Force
+# }
+
 Write-Host "Creating zip file from folder '$($folder)'"
 
 # create a zip file from the temp folder then remove the temp folder 
@@ -52,7 +59,7 @@ Remove-Item -LiteralPath "$($folder)$($rnd)" -Force -Recurse
 
 if (@("win", "both").Contains($settings.christofs_options.save_to)) {
     # want to upload to Qlik Sense on Windows
-    Write-Host "`n--> Qlik Sense on Windows: Publishing extension '$($extension_name)'"
+    Write-Host -f Cyan "`n--> Qlik Sense on Windows: Publishing extension '$($extension_name)'"
     $cert = Get-PfxCertificate -FilePath $settings.christofs_options.client_cert_location
     $api_url = $settings.christofs_options.qrs_url
     $xrfkey = "A3VWMWM3VGRH4X3F"
