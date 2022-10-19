@@ -2,6 +2,8 @@
 # to Qlik Sense Windows or Qlik Cloud or both, depending on the settings in settings.json
 # if the extension already exists, it will be patched with the new version
 
+# source: https://github.com/ChristofSchwarz/vs-code-qlikextension/blob/main/.vscode/updateExtension.ps1
+
 # Christof Schwarz, 06-Jun-2022, Original version
 # Christof Schwarz, 21-Jun-2022, fix to check if .bat file or .git folder exists before deleting it
 # Christof Schwarz, 15-Jul-2022, delete all *.ps1 files in the zip copy
