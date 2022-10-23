@@ -1,11 +1,16 @@
+# Version 23-Oct-2022
 git add . 
 git commit -m "updates"  
 git push -u origin main
 $qextFilename = Get-ChildItem -Filter '*.qext' | Select-Object -First 1
 $qext = Get-Content $qextFilename -raw | ConvertFrom-Json
 if ($qext.homepage -like '*github.com*') {
-    Write-Host "Maybe create a release $($qext.version) on $($qext.homepage)/releases/new"
-} else {
+    Write-Host -f Cyan "Maybe create a release $($qext.version) on $($qext.homepage)/releases/new"
+}
+if ($qext.repository -like '*github.com*') {
+    Write-Host -f Cyan "Maybe create a release $($qext.version) on $($qext.repository)/releases/new"
+}
+else {
     Write-Host "Pushed release $($qext.version) to git"
 }
 $confirmation = Read-Host "Increase the version counter in .qext file now? (y/n)"
