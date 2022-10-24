@@ -1,4 +1,6 @@
 # Version 23-Oct-2022
+# check here https://raw.githubusercontent.com/ChristofSchwarz/vs-code-qlikextension/main/pushToGit.ps1
+
 git add . 
 git commit -m "updates"  
 git push -u origin main
