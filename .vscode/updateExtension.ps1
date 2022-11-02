@@ -9,8 +9,9 @@
 # Christof Schwarz, 15-Jul-2022, delete all *.ps1 files in the zip copy
 # v1.1, Christof Schwarz, 25-Sep-2022, ask to enter new API Key in cloud, when first command fails 
 # v1.1.1, Christof Schwarz, 11-Oct-2022, coloring the console output
+# v1.1.2, Christof Schwarz, 02-Nov-2022, fix for younger qlik.exe versions
 
-Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.1.1 ***"
+Write-Host "*** update Qlik Extension PS Script by Christof Schwarz v1.1.2 ***"
 
 # Read settings from Json file
 $settings = Get-Content -Raw -Path ".vscode\settings.json" | ConvertFrom-Json
@@ -122,9 +123,9 @@ if (@("cloud", "both").Contains($settings.christofs_options.save_to)) {
         if (-not $extension_list) {
             Write-Host -f Red "Error: qlik.exe does not answer as expected."
             $server = & $qlik_exe context get | Where-Object { $_ -like "Server:*" }
-            $server = ($server.split('Server:')[1]).Trim()
+            $server = ($server.split('erver:')[1]).Trim()
             $context = & $qlik_exe context get | Where-Object { $_ -like "Name:*" }
-            $context = ($context.split('Name:')[1]).Trim()
+            $context = ($context.split('ame:')[1]).Trim()
             Write-Host -F Green "Try context $context with a new API Key, get it on $server"
             
             $apikey = Read-Host -Prompt "New API Key (leave emtpy to quit)"
