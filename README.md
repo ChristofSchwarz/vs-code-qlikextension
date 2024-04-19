@@ -4,6 +4,7 @@ Environment: Windows
 
 ### In either case you need
 - "Run on Save" extension in Visual Studio Code
+![image](https://github.com/ChristofSchwarz/vs-code-qlikextension/assets/15999058/11d2863c-9e3b-4c39-b292-14cd6aa17663)
 
 ### If you upload to Qlik Cloud, you need
 - Qlik CLI from https://qlik.dev/tutorials/get-started-with-qlik-cli
